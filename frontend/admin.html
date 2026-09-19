@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organizer Console — GreenGrid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<style>
+  body{ cursor:none; }
+  .panel-view{ display:none; }
+  .panel-view.active{ display:block; }
+  .score-mini{ display:flex; align-items:center; gap:16px; }
+  .score-mini .num{ font-family:'Space Grotesk',sans-serif; font-size:34px; font-weight:800; }
+  .score-mini .num.high{ color:var(--mint); } .score-mini .num.mid{ color:var(--cyan); } .score-mini .num.low{ color:var(--ember); }
+  .budget-bar{ background:var(--bg-panel-2); border-radius:999px; height:10px; overflow:hidden; margin-top:8px; }
+  .budget-fill{ height:100%; border-radius:999px; transition:width .5s; }
+  .checklist-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line-soft); }
+  .checklist-row:last-child{ border-bottom:none; }
+  .switch{ width:38px; height:22px; border-radius:999px; background:var(--bg-panel-2); border:1px solid var(--line); position:relative; cursor:pointer; flex-shrink:0; }
+  .switch .knob{ position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:var(--paper-dim); transition:all .25s; }
+  .switch.on{ background:rgba(124,255,178,0.18); border-color:var(--mint); }
+  .switch.on .knob{ left:18px; background:var(--mint); }
+  .event-row{ display:flex; align-items:center; justify-content:space-between; padding:14px; border:1px solid var(--line); border-radius:14px; margin-bottom:10px; background:var(--bg-panel); }
+  .report-row{ padding:14px; border:1px solid var(--line); border-radius:14px; margin-bottom:10px; background:var(--bg-panel); }
+  .report-row .rh{ display:flex; justify-content:space-between; align-items:flex-start; }
+</style>
+</head>
+<body data-require-role="admin">
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="logo"><span class="logo-mark"></span> GreenGrid</div>
+    <div class="side-link active" data-panel="overview"><span class="em">🏠</span> Overview</div>
+    <div class="side-link" data-panel="create"><span class="em">➕</span> Create Event</div>
+    <div class="side-link" data-panel="events"><span class="em">🎟️</span> My Events</div>
+    <div class="side-link" data-panel="reports"><span class="em">🚨</span> Civic Reports</div>
+    <a class="side-link" href="mentors.html"><span class="em">🎓</span> Mentorship</a>
+    <a class="side-link" href="opendata.html"><span class="em">📊</span> Open Data</a>
+    <div class="side-foot">
+      <div id="sideUserName" style="color:var(--paper); font-weight:600;">—</div>
+      <div style="margin-top:6px; cursor:pointer; color:var(--danger);" onclick="logout()">Log out</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- OVERVIEW -->
+    <section class="panel-view active" id="panel-overview">
+      <div class="main-head"><div><h1 id="greeting">Organizer console</h1><div class="sub">Campus-wide GreenScore analytics.</div></div></div>
+      <div class="grid grid-4" id="adminStats">Loading…</div>
+      <div class="panel reveal" style="margin-top:20px;">
+        <h3 style="margin-bottom:14px;">Guilds — campus action groups</h3>
+        <div id="adminGuilds">Loading…</div>
+      </div>
+    </section>
+
+    <!-- CREATE EVENT (What-if Simulator) -->
+    <section class="panel-view" id="panel-create">
+      <div class="main-head"><div><h1>Create Event · Impact Simulator</h1><div class="sub">Flip the checklist and watch GreenScore + carbon budget update live, before you publish.</div></div></div>
+      <div class="grid grid-2">
+        <div class="panel reveal">
+          <div class="field"><label>Event title</label><input type="text" id="cTitle" placeholder="e.g. AI Hackathon" required></div>
+          <div class="field"><label>Category</label>
+            <select id="cCategory"><option>Tech</option><option>Workshops</option><option>Community</option><option>Culture</option><option>Sports</option></select>
+          </div>
+          <div class="field"><label>Date</label><input type="date" id="cDate" required></div>
+          <div class="field"><label>Location</label><input type="text" id="cLocation" placeholder="e.g. Main Auditorium"></div>
+          <div class="grid" style="grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="field"><label>Attendees</label><input type="number" id="cAttendees" value="300" min="1"></div>
+            <div class="field"><label>Duration (hrs)</label><input type="number" id="cDuration" value="8" min="1"></div>
+          </div>
+          <div class="grid" style="grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="field"><label>Mode</label><select id="cMode"><option value="offline">Offline</option><option value="hybrid">Hybrid</option><option value="online">Online</option></select></div>
+            <div class="field"><label>Venue type</label><select id="cVenue"><option value="auditorium">Auditorium</option><option value="outdoor">Outdoor</option><option value="classroom">Classroom</option><option value="hybrid-lab">Hybrid Lab</option></select></div>
+          </div>
+          <button class="btn-primary" id="btnCreate" data-magnetic style="width:100%; margin-top:10px;">Publish Event</button>
+          <div id="createMsg" style="font-size:12px; margin-top:10px;"></div>
+        </div>
+        <div>
+          <div class="panel reveal" style="margin-bottom:16px;">
+            <div class="score-mini">
+              <div><div class="num" id="simScore">48</div><div style="font-size:11px; color:var(--paper-dim);">GreenScore</div></div>
+              <div style="flex:1;">
+                <div style="font-size:12px; color:var(--paper-dim);">CO₂ estimate: <span id="simCo2">840</span> kg · Budget: <span id="simBudget">420</span> kg</div>
+                <div class="budget-bar"><div class="budget-fill" id="simBudgetBar" style="width:0%; background:var(--ember);"></div></div>
+                <div style="font-size:11px; margin-top:6px; color:var(--paper-dim);" id="simBudgetNote"></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel reveal">
+            <h3 style="margin-bottom:10px;">Green Certification Checklist</h3>
+            <div id="checklistWrap"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EVENTS -->
+    <section class="panel-view" id="panel-events">
+      <div class="main-head"><div><h1>My Events</h1><div class="sub">Certify events that clear GreenScore 60+.</div></div></div>
+      <div id="adminEventsList">Loading…</div>
+    </section>
+
+    <!-- REPORTS -->
+    <section class="panel-view" id="panel-reports">
+      <div class="main-head"><div><h1>Civic Reports</h1><div class="sub">AI-routed and clustered — resolve to reward the reporting student.</div></div></div>
+      <div id="adminReportsList">Loading…</div>
+    </section>
+  </main>
+</div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth-guard.js"></script>
+<script src="assets/js/cursor.js"></script>
+<script src="assets/js/sri.js"></script>
+<script>
+const user0 = GG_API.getUser() || { name: 'Organizer', role: 'admin' };
+document.getElementById('greeting').textContent = `Welcome, ${user0.name}`;
+document.getElementById('sideUserName').textContent = user0.name;
+function logout(){ GG_API.clearToken(); window.location.href = 'login.html'; }
+
+document.querySelectorAll('.side-link[data-panel]').forEach(link=>{
+  link.addEventListener('click', ()=>{
+    document.querySelectorAll('.side-link[data-panel]').forEach(l=>l.classList.remove('active'));
+    link.classList.add('active');
+    document.querySelectorAll('.panel-view').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+link.dataset.panel).classList.add('active');
+    window.GG_wireReveal && window.GG_wireReveal();
+    window.GG_rewire && window.GG_rewire();
+  });
+});
+
+function gsClass(score){ return score >= 75 ? 'high' : score >= 55 ? 'mid' : 'low'; }
+
+async function loadOverview(){
+  try{
+    const d = await GG_API.adminOverview();
+    document.getElementById('adminStats').innerHTML = `
+      <div class="stat-card"><div class="ico">🏟️</div><div class="lbl">Total Events</div><div class="val">${GG_API.esc(d.stats.totalEvents)}</div></div>
+      <div class="stat-card"><div class="ico">🌿</div><div class="lbl">Certified</div><div class="val">${GG_API.esc(d.stats.certified)}</div></div>
+      <div class="stat-card"><div class="ico">📈</div><div class="lbl">Avg GreenScore</div><div class="val">${GG_API.esc(d.stats.avgGreenScore)}</div></div>
+      <div class="stat-card"><div class="ico">🚨</div><div class="lbl">Open Reports</div><div class="val">${GG_API.esc(d.stats.openReports)}</div></div>`;
+    document.getElementById('adminGuilds').innerHTML = d.guilds.map(g=>`
+      <div class="mission-row" style="border-bottom:1px solid var(--line-soft); padding:12px 0;"><div><div style="font-weight:700;">${GG_API.esc(g.name)}</div><div style="font-size:12px;color:var(--paper-dim);">${g.memberIds.length} members</div></div>
+      <div style="color:var(--mint); font-family:'JetBrains Mono',monospace;">${GG_API.esc(g.co2SavedKg)}kg CO₂</div></div>`).join('');
+    // Pass the overview data to loadAdminEvents so it can reuse myEvents
+    // without firing a second adminOverview() request.
+    loadAdminEvents(d);
+    return d;
+  }catch(e){ document.getElementById('adminStats').innerHTML = `<p style="color:var(--danger)">${GG_API.esc(e.message)}</p>`; }
+}
+
+/* ---- checklist + live simulator ---- */
+const CHECKS = [
+  { key:'hybrid', label:'Enable hybrid attendance' },
+  { key:'reusable', label:'Reusable food containers' },
+  { key:'publicTransport', label:'Public transport incentive' },
+  { key:'digitalCerts', label:'Digital certificates only' },
+  { key:'wasteSeg', label:'Waste segregation stations' },
+];
+const checklistState = { hybrid:false, reusable:false, publicTransport:false, digitalCerts:false, wasteSeg:false };
+const wrap = document.getElementById('checklistWrap');
+CHECKS.forEach(c=>{
+  const row = document.createElement('div'); row.className='checklist-row';
+  row.innerHTML = `<span style="font-size:13px;">${c.label}</span><div class="switch" id="chk-${c.key}"><div class="knob"></div></div>`;
+  wrap.appendChild(row);
+  document.getElementById('chk-'+c.key).addEventListener('click', function(){
+    checklistState[c.key] = !checklistState[c.key];
+    this.classList.toggle('on', checklistState[c.key]);
+    runSim();
+  });
+});
+
+let simTimer;
+async function runSim(){
+  clearTimeout(simTimer);
+  simTimer = setTimeout(async ()=>{
+    const payload = {
+      attendeeCount: +document.getElementById('cAttendees').value || 1,
+      durationHrs: +document.getElementById('cDuration').value || 1,
+      mode: document.getElementById('cMode').value,
+      venueType: document.getElementById('cVenue').value,
+      checklist: checklistState,
+    };
+    try{
+      const { result } = await GG_API.simulateEvent(payload);
+      document.getElementById('simScore').textContent = result.greenScore;
+      document.getElementById('simScore').className = 'num ' + gsClass(result.greenScore);
+      document.getElementById('simCo2').textContent = result.co2EstimateKg;
+      document.getElementById('simBudget').textContent = result.carbonBudgetKg;
+      const pct = Math.min(150, Math.round((result.co2EstimateKg / result.carbonBudgetKg) * 100));
+      document.getElementById('simBudgetBar').style.width = Math.min(100,pct) + '%';
+      document.getElementById('simBudgetBar').style.background = result.overBudgetKg > 0 ? 'var(--danger)' : 'var(--mint)';
+      document.getElementById('simBudgetNote').textContent = result.overBudgetKg > 0
+        ? `⚠️ ${result.overBudgetKg}kg over budget — toggle more checklist items.`
+        : `✅ Under budget · Model ${result.modelVersion}`;
+    }catch(e){ /* backend offline — leave last known values */ }
+  }, 150);
+}
+['cAttendees','cDuration','cMode','cVenue'].forEach(id=> document.getElementById(id).addEventListener('input', runSim));
+runSim();
+
+document.getElementById('btnCreate').addEventListener('click', async ()=>{
+  const msg = document.getElementById('createMsg');
+  msg.textContent=''; msg.style.color='var(--paper-dim)';
+  const payload = {
+    title: document.getElementById('cTitle').value,
+    category: document.getElementById('cCategory').value,
+    date: document.getElementById('cDate').value || new Date().toISOString(),
+    location: document.getElementById('cLocation').value,
+    attendeeCount: +document.getElementById('cAttendees').value,
+    durationHrs: +document.getElementById('cDuration').value,
+    mode: document.getElementById('cMode').value,
+    venueType: document.getElementById('cVenue').value,
+    checklist: checklistState,
+  };
+  if(!payload.title){ msg.style.color='var(--danger)'; msg.textContent='Give the event a title first.'; return; }
+  try{
+    const res = await GG_API.createEvent(payload);
+    msg.style.color='var(--mint)'; msg.textContent = `Published with GreenScore ${res.event.greenScore}.`;
+    GGToast('Event published', res.event.title, '🎉');
+    document.getElementById('cTitle').value='';
+    loadAdminEvents(); loadOverview();
+  }catch(e){ msg.style.color='var(--danger)'; msg.textContent = e.message; }
+});
+
+// Accepts the overview data from loadOverview() to avoid a second
+// adminOverview() fetch; falls back to a fresh call only if needed.
+async function loadAdminEvents(overviewData){
+  try{
+    const { myEvents } = overviewData || await GG_API.adminOverview();
+    document.getElementById('adminEventsList').innerHTML = myEvents.map(e => `
+      <div class="event-row"><div>
+        <div style="font-weight:700;">${GG_API.esc(e.title)} ${e.certified?'<span class="badge green">🌿 Certified</span>':''}</div>
+        <div style="font-size:12px; color:var(--paper-dim);">${GG_API.esc(e.category)} · ${new Date(e.date).toLocaleDateString()} · ${GG_API.esc(e.attendeeCount)} attendees</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span class="gs-pill ${gsClass(e.greenScore)}" style="padding:5px 12px; border-radius:999px; font-family:'JetBrains Mono',monospace; font-size:12px;">🌿 ${GG_API.esc(e.greenScore)}</span>
+        ${!e.certified ? `<button class="btn-ghost btn-sm" data-cert="${GG_API.esc(e.id)}">Certify</button>` : ''}
+      </div></div>`).join('');
+    document.querySelectorAll('[data-cert]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        try{ await GG_API.certifyEvent(btn.dataset.cert); GGToast('Certified 🌿', 'Event is now Green Certified.', '🌿'); loadAdminEvents(); loadOverview(); }
+        catch(e){ GGToast('Cannot certify', e.message, '⚠️'); }
+      });
+    });
+  }catch(e){ document.getElementById('adminEventsList').innerHTML = `<p style="color:var(--danger)">${GG_API.esc(e.message)}</p>`; }
+}
+
+async function loadReports(){
+  try{
+    const { reports } = await GG_API.adminReports();
+    document.getElementById('adminReportsList').innerHTML = reports.map(r => `
+      <div class="report-row"><div class="rh">
+        <div><div style="font-weight:700;">${GG_API.esc(r.title)}</div><div style="font-size:12px; color:var(--paper-dim);">${GG_API.esc(r.location)} · ${GG_API.esc(r.ai?.category||'—')} · ${new Date(r.createdAt).toLocaleDateString()}</div></div>
+        <span class="badge ${r.status==='resolved'?'green': r.ai?.urgency==='HIGH'?'amber':'violet'}">${GG_API.esc(r.status)}</span>
+      </div>
+      <div style="font-size:12.5px; color:var(--paper-dim); margin-top:8px;">${GG_API.esc(r.ai?.narrative || r.ai?.summary || '')}</div>
+      <div style="font-size:12px; margin-top:6px;">Routed to <b>${GG_API.esc(r.ai?.responsibleTeam||'—')}</b> · Confidence ${GG_API.esc(r.ai?.confidence||0)}% ${r.ai?.relatedCount ? `· ${GG_API.esc(r.ai.relatedCount)} related report(s) clustered` : ''}</div>
+      ${r.status!=='resolved' ? `<button class="btn-ghost btn-sm" style="margin-top:10px;" data-resolve="${GG_API.esc(r.id)}">Mark Resolved</button>` : ''}
+      </div>`).join('');
+    document.querySelectorAll('[data-resolve]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        try{ await GG_API.adminResolve(btn.dataset.resolve); GGToast('Resolved ✅', 'Reporting student rewarded.', '✅'); loadReports(); loadOverview(); }
+        catch(e){ GGToast('Could not resolve', e.message, '⚠️'); }
+      });
+    });
+  }catch(e){ document.getElementById('adminReportsList').innerHTML = `<p style="color:var(--danger)">${GG_API.esc(e.message)}</p>`; }
+}
+
+(function boot(){
+  // loadOverview calls loadAdminEvents internally to share the single
+  // adminOverview() API response — no duplicate requests.
+  loadOverview(); loadReports();
+})();
+</script>
+</body>
+</html>

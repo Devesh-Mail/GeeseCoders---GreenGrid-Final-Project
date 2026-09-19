@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in · GreenGrid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+</head>
+<body>
+
+<div id="cur-dot"></div>
+<div id="cur-ring"></div>
+
+<div class="auth-shell">
+
+  <!-- ---------------- left: brand + live proof ---------------- -->
+  <aside class="auth-aside">
+    <canvas id="lattice"></canvas>
+
+    <a href="index.html" style="display:flex; align-items:center; gap:10px; font-weight:600; font-size:17px;">
+      <span style="width:22px;height:22px;border:1.5px solid var(--mint);border-radius:5px;transform:rotate(45deg);position:relative;display:inline-block;">
+        <span style="position:absolute;inset:5px;background:var(--mint);border-radius:2px;display:block;"></span>
+      </span>
+      GreenGrid
+    </a>
+
+    <div>
+      <div class="auth-quote">AllCollegeEvent tells you <em>which event</em> to attend.<br>GreenGrid tells you <em>what it changed.</em></div>
+      <p class="auth-sub">
+        Plan an event's impact before it happens, turn attendance into verified action while it runs,
+        and hand everyone a receipt afterwards — students, organisers and sponsors reading the same numbers.
+      </p>
+    </div>
+
+    <div class="auth-proof">
+      <div><div class="n" id="p1">—</div><div class="l">Events scored</div></div>
+      <div><div class="n" id="p2">—</div><div class="l">kg CO₂e avoided</div></div>
+      <div><div class="n" id="p3">—</div><div class="l">Verified actions</div></div>
+      <div><div class="n mono" style="color:var(--paper-dim); font-size:13px;" id="p4">—</div><div class="l">Scoring model</div></div>
+    </div>
+  </aside>
+
+  <!-- ---------------- right: the form ---------------- -->
+  <main class="auth-main">
+    <div class="auth-card" id="card">
+      <div class="role-switch">
+        <span class="role-pill"></span>
+        <button id="tabStudent" class="active" type="button">Student</button>
+        <button id="tabAdmin" type="button">Organiser</button>
+      </div>
+
+      <h1 id="title">Welcome back</h1>
+      <p class="lede" id="lede">Track your missions, EcoPool rides and impact receipts.</p>
+
+      <div id="err" class="auth-err" style="display:none;"></div>
+
+      <form id="form" novalidate>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="username" placeholder="you@campus.edu" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+        </div>
+        <button class="btn-submit" id="submit" type="submit">Sign in</button>
+      </form>
+
+      <div class="demo-fill">
+        <b>Demo accounts</b> — this is a prototype, so both are pre-seeded.<br>
+        Student <span class="mono">rohan@campus.edu / student123</span><br>
+        Organiser <span class="mono">organizer@campus.edu / admin123</span>
+        <br><button type="button" id="fill">Fill the current role's credentials</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/cursor.js"></script>
+<script>
+/* ---------------- role switching ---------------- */
+let role = 'student';
+const card = document.getElementById('card');
+const COPY = {
+  student: { title: 'Welcome back', lede: 'Track your missions, EcoPool rides and impact receipts.', cta: 'Sign in' },
+  admin:   { title: 'Organiser console', lede: 'Plan event impact, certify, and see sponsor ROI.', cta: 'Open console' },
+};
+function setRole(r){
+  role = r;
+  card.classList.toggle('is-admin', r === 'admin');
+  document.getElementById('tabStudent').classList.toggle('active', r === 'student');
+  document.getElementById('tabAdmin').classList.toggle('active', r === 'admin');
+  document.getElementById('title').textContent = COPY[r].title;
+  document.getElementById('lede').textContent = COPY[r].lede;
+  document.getElementById('submit').textContent = COPY[r].cta;
+  hideErr();
+}
+document.getElementById('tabStudent').onclick = () => setRole('student');
+document.getElementById('tabAdmin').onclick = () => setRole('admin');
+
+document.getElementById('fill').onclick = () => {
+  document.getElementById('email').value = role === 'admin' ? 'organizer@campus.edu' : 'rohan@campus.edu';
+  document.getElementById('password').value = role === 'admin' ? 'admin123' : 'student123';
+  hideErr();
+};
+
+/* ---------------- errors ---------------- */
+const errBox = document.getElementById('err');
+function showErr(msg){ errBox.textContent = msg; errBox.style.display = 'block'; }
+function hideErr(){ errBox.style.display = 'none'; }
+
+/* ---------------- submit ---------------- */
+document.getElementById('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideErr();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  if (!email || !password) return showErr('Enter both your email and password.');
+
+  const btn = document.getElementById('submit');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const res = await GG_API.login(email, password);
+    // Persist the session token + user object before redirecting.
+    // Without these two calls the auth-guard on every protected page
+    // will find localStorage empty and redirect straight back here.
+    GG_API.setToken(res.token);
+    GG_API.setUser(res.user);
+    // The account's real role decides where you land — not the tab you
+    // happened to have selected. Picking "Organiser" does not grant
+    // organiser access; the server is the authority on that.
+    const actual = res.user.role;
+    if (actual !== role) {
+      GGToast('Signed in as ' + actual, 'That account is a ' + actual + ' account, so we opened the ' + actual + ' view.', 'ℹ️');
+    }
+    window.location.href = actual === 'admin' ? 'admin.html' : 'dashboard.html';
+  } catch (err) {
+    showErr(err.message || 'Could not sign in. Check your details and try again.');
+    btn.disabled = false; btn.textContent = COPY[role].cta;
+  }
+});
+
+/* ---------------- live proof numbers from the real API ---------------- */
+(async function proof(){
+  try{
+    const d = await GG_API.openData();
+    const t = d.totals || {};
+    document.getElementById('p1').textContent = t.events ?? '—';
+    document.getElementById('p2').textContent = Math.round(t.totalCo2SavedKg ?? 0).toLocaleString();
+    document.getElementById('p3').textContent = (t.totalTransactions ?? 0).toLocaleString();
+    document.getElementById('p4').textContent = d.modelVersion || 'greenscore-v2.0';
+  }catch(e){
+    // The aside is decoration; if the backend is down the form must still
+    // work, so this failure is deliberately silent apart from the dashes.
+    document.getElementById('p4').textContent = 'offline';
+  }
+})();
+
+/* ---------------- animated lattice (left panel) ---------------- */
+(function lattice(){
+  const c = document.getElementById('lattice');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  let nodes = [], raf;
+  function size(){
+    c.width = c.offsetWidth; c.height = c.offsetHeight;
+    const count = Math.max(18, Math.round((c.width * c.height) / 26000));
+    nodes = Array.from({length: count}, () => ({
+      x: Math.random()*c.width, y: Math.random()*c.height,
+      vx: (Math.random()-.5)*.25, vy: (Math.random()-.5)*.25,
+    }));
+  }
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > c.width) n.vx *= -1;
+      if (n.y < 0 || n.y > c.height) n.vy *= -1;
+    });
+    for (let i=0;i<nodes.length;i++){
+      for (let j=i+1;j<nodes.length;j++){
+        const dx = nodes[i].x-nodes[j].x, dy = nodes[i].y-nodes[j].y;
+        const d = Math.hypot(dx,dy);
+        if (d < 130){
+          ctx.strokeStyle = 'rgba(124,255,178,' + (0.16*(1-d/130)).toFixed(3) + ')';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(nodes[i].x,nodes[i].y); ctx.lineTo(nodes[j].x,nodes[j].y); ctx.stroke();
+        }
+      }
+      ctx.fillStyle = 'rgba(77,232,212,.5)';
+      ctx.beginPath(); ctx.arc(nodes[i].x,nodes[i].y,1.6,0,Math.PI*2); ctx.fill();
+    }
+    raf = requestAnimationFrame(draw);
+  }
+  size(); draw();
+  window.addEventListener('resize', () => { cancelAnimationFrame(raf); size(); draw(); });
+})();
+
+/* ---------------- toast ---------------- */
+function GGToast(title, detail, icon){
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = '<div class="t">' + (icon||'') + ' ' + title + '</div><div class="d">' + (detail||'') + '</div>';
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 4200);
+}
+
+/* If a session already exists, skip the form entirely. */
+if (GG_API.token() && GG_API.getUser()){
+  const u = GG_API.getUser();
+  window.location.replace(u.role === 'admin' ? 'admin.html' : 'dashboard.html');
+}
+</script>
+</body>
+</html>

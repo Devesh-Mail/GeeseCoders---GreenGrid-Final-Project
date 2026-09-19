@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mentorship · GreenGrid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<style>
+  .topbar{ display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(7,19,14,.86);backdrop-filter:blur(12px);z-index:50; }
+  .topbar nav{ display:flex;gap:22px;font-size:13px;color:var(--paper-dim); }
+  .topbar nav a:hover{ color:var(--paper); }
+  .page{ padding:36px 0 110px; }
+  .cols{ display:grid; grid-template-columns:1.6fr .9fr; gap:22px; align-items:start; }
+  @media (max-width:960px){ .cols{ grid-template-columns:1fr; } }
+
+  .need-box{ display:flex; gap:9px; margin-bottom:18px; flex-wrap:wrap; }
+  .need-box input{ flex:1; min-width:220px; background:var(--bg-panel-2); border:1px solid var(--line);
+    border-radius:11px; padding:12px 14px; color:var(--paper); font-size:13.5px; font-family:'Inter',sans-serif; outline:none; }
+  .need-box input:focus{ border-color:var(--mint); }
+  .need-box button{ background:var(--mint); color:#07130E; border:none; border-radius:11px; padding:0 20px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px; cursor:pointer; }
+  .quick{ display:flex; gap:7px; flex-wrap:wrap; margin-bottom:22px; }
+  .quick button{ background:var(--bg-panel-2); border:1px solid var(--line); color:var(--paper-dim);
+    border-radius:99px; padding:7px 13px; font-size:11.5px; cursor:pointer; font-family:'Inter',sans-serif; }
+  .quick button:hover{ border-color:var(--mint); color:var(--mint); }
+
+  .mentor{ display:flex; gap:16px; padding:20px; border:1px solid var(--line); border-radius:var(--radius);
+    background:var(--bg-panel); margin-bottom:14px; }
+  .mentor .av{ width:52px;height:52px;border-radius:14px;background:var(--bg-panel-3);display:flex;
+    align-items:center;justify-content:center;font-size:24px;flex-shrink:0; }
+  .mentor h3{ font-size:16px; font-weight:600; }
+  .mentor .role{ font-size:12px; color:var(--paper-dim); margin-top:2px; }
+  .mentor .bio{ font-size:12.5px; color:var(--paper-dim); line-height:1.6; margin:11px 0; }
+  .tags{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .why{ font-size:11px; color:var(--mint); margin-top:9px; }
+  .why.none{ color:var(--paper-dim); }
+  .slots{ display:flex; gap:7px; flex-wrap:wrap; margin-top:13px; }
+  .slot{ background:var(--bg-panel-2); border:1px solid var(--line); color:var(--paper);
+    border-radius:9px; padding:8px 12px; font-size:11.5px; cursor:pointer; font-family:'Inter',sans-serif; }
+  .slot:hover{ border-color:var(--mint); color:var(--mint); }
+
+  .modal-bg{ position:fixed; inset:0; background:rgba(3,8,6,.78); backdrop-filter:blur(6px);
+    z-index:9500; display:none; align-items:center; justify-content:center; padding:20px; }
+  .modal-bg.show{ display:flex; }
+  .modal{ background:var(--bg-panel); border:1px solid var(--line); border-radius:20px; padding:26px;
+    width:100%; max-width:430px; animation:sri-pop .3s cubic-bezier(.2,.8,.3,1); }
+  @keyframes sri-pop{ from{opacity:0;transform:translateY(14px) scale(.96)} to{opacity:1;transform:none} }
+  .modal h3{ font-size:18px; margin-bottom:5px; }
+  .modal .sub{ font-size:12.5px; color:var(--paper-dim); margin-bottom:18px; }
+  .modal textarea{ width:100%; background:var(--bg-panel-2); border:1px solid var(--line); border-radius:11px;
+    padding:12px 14px; color:var(--paper); font-size:13px; font-family:'Inter',sans-serif; outline:none;
+    resize:vertical; min-height:80px; }
+  .modal textarea:focus{ border-color:var(--mint); }
+
+  .session{ border:1px solid var(--line); border-radius:13px; padding:15px; margin-bottom:11px; background:var(--bg-panel-2); }
+  .session .when{ font-size:11px; color:var(--paper-dim); }
+  .session h4{ font-size:14px; font-weight:600; margin:4px 0 8px; }
+  .join{ display:inline-block; background:var(--cyan); color:#07130E; border-radius:9px; padding:9px 15px;
+    font-size:12.5px; font-weight:700; font-family:'Space Grotesk',sans-serif; margin-top:6px; }
+  .link-mini{ background:none;border:none;color:var(--paper-dim);font-size:11.5px;cursor:pointer;
+    text-decoration:underline;font-family:'Inter',sans-serif;padding:0;margin-top:9px; }
+  .ai-item{ display:flex; gap:9px; align-items:flex-start; font-size:12.5px; padding:6px 0; color:var(--paper-dim); }
+  .ai-item input{ margin-top:2px; accent-color:#7CFFB2; }
+  .ai-item.done{ text-decoration:line-through; opacity:.55; }
+</style>
+</head>
+<body>
+
+<div id="cur-dot"></div><div id="cur-ring"></div>
+
+<div class="topbar">
+  <a href="index.html" style="display:flex;align-items:center;gap:9px;font-weight:600;">
+    <span style="width:19px;height:19px;border:1.5px solid var(--mint);border-radius:5px;transform:rotate(45deg);position:relative;display:inline-block;">
+      <span style="position:absolute;inset:4px;background:var(--mint);border-radius:2px;display:block;"></span>
+    </span>GreenGrid
+  </a>
+  <nav>
+    <a href="dashboard.html">Student</a>
+    <a href="admin.html">Organiser</a>
+    <a href="mentors.html" style="color:var(--mint)">Mentorship</a>
+    <a href="sponsor.html">Sponsor</a>
+    <a href="embed-demo.html">Embed</a>
+    <a href="opendata.html">Open Data</a>
+  </nav>
+</div>
+
+<div class="wrap page">
+  <div style="max-width:700px;margin-bottom:26px;">
+    <span class="chip violet">Virtual mentorship</span>
+    <h1 style="font-size:28px;font-weight:600;margin:12px 0 8px;">Talk to someone who has done it before</h1>
+    <p style="color:var(--paper-dim);font-size:14px;line-height:1.65;">
+      Say what you're stuck on and we'll rank mentors by actual expertise overlap — and show you why each
+      one was matched. Book a real published slot, meet over video, and leave with written notes and
+      action items saved to your profile.
+    </p>
+  </div>
+
+  <div class="cols">
+    <div>
+      <div class="need-box">
+        <input id="need" placeholder="e.g. cutting transport emissions for a 300-person hackathon">
+        <button id="findBtn">Find mentors</button>
+      </div>
+      <div class="quick">
+        <button data-q="event carbon planning">Event carbon planning</button>
+        <button data-q="waste systems and composting">Waste systems</button>
+        <button data-q="sponsorship and CSR funding">Sponsorship</button>
+        <button data-q="transport emissions and commute">Transport</button>
+        <button data-q="campus policy">Campus policy</button>
+      </div>
+      <div id="matchNote" style="font-size:11.5px;color:var(--paper-dim);margin-bottom:14px;line-height:1.6;"></div>
+      <div id="list"><div class="panel"><div class="skeleton" style="height:90px;"></div></div></div>
+    </div>
+
+    <div>
+      <div class="panel" style="margin-bottom:18px;">
+        <div class="panel-head"><h3 style="font-size:15px;">Your sessions</h3></div>
+        <div id="sessions"><div style="font-size:12.5px;color:var(--paper-dim);">Sign in to see your sessions.</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3 style="font-size:15px;">How matching works</h3></div>
+        <p style="font-size:12.5px;color:var(--paper-dim);line-height:1.7;">
+          Exact expertise phrase scores 10, a related term scores 5, then availability adds up to 3 and a
+          strong rating adds 1. Availability is only ever a tiebreak — a well-matched mentor with one slot
+          still outranks a poor match with ten. It's deterministic, so the same question always returns the
+          same order, and every card tells you what it matched on.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- booking modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="mTitle">Book a session</h3>
+    <div class="sub" id="mSub">—</div>
+    <div class="field"><label>What do you want to cover?</label>
+      <input id="mTopic" placeholder="e.g. Transport emissions"></div>
+    <div class="field"><label>Your question (the mentor sees this beforehand)</label>
+      <textarea id="mQ" placeholder="Be specific — it makes 30 minutes go much further."></textarea></div>
+    <div style="display:flex;gap:9px;margin-top:6px;">
+      <button class="btn-submit" id="mConfirm" style="flex:1;">Confirm booking</button>
+      <button class="btn-submit" id="mCancel" style="flex:0 0 auto;background:var(--bg-panel-2);color:var(--paper-dim);padding:14px 18px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- complete-session modal -->
+<div class="modal-bg" id="doneBg">
+  <div class="modal">
+    <h3>Close out this session</h3>
+    <div class="sub">Notes are required — a session with no record isn't much use three weeks later.</div>
+    <div class="field"><label>What did you learn?</label>
+      <textarea id="dNotes" placeholder="Key points from the conversation…"></textarea></div>
+    <div class="field"><label>Action items (one per line)</label>
+      <textarea id="dActions" placeholder="Switch to digital certificates&#10;Ask facilities about segregation bins"></textarea></div>
+    <div style="display:flex;gap:9px;margin-top:6px;">
+      <button class="btn-submit" id="dConfirm" style="flex:1;">Save (+80 XP)</button>
+      <button class="btn-submit" id="dCancel" style="flex:0 0 auto;background:var(--bg-panel-2);color:var(--paper-dim);padding:14px 18px;">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/cursor.js"></script>
+<script src="assets/js/sri.js"></script>
+<script>
+const signedIn = !!(GG_API.token() && GG_API.getUser());
+let pending = null, closing = null;
+
+const when = iso => new Date(iso).toLocaleString('en-IN',
+  { weekday:'short', day:'numeric', month:'short', hour:'numeric', minute:'2-digit' });
+
+function toast(t, d, i){
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = '<div class="t">'+(i||'')+' '+t+'</div><div class="d">'+(d||'')+'</div>';
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(), 4600);
+}
+
+/* ---------------- mentors ---------------- */
+async function findMentors(need){
+  const list = document.getElementById('list');
+  list.innerHTML = '<div class="panel"><div class="skeleton" style="height:90px;"></div></div>';
+  try{
+    const d = await GG_API.get('/mentors' + (need ? '?need=' + encodeURIComponent(need) : ''));
+    document.getElementById('matchNote').textContent = d.matchingExplained || '';
+    list.innerHTML = d.mentors.map(m => `
+      <div class="mentor">
+        <div class="av">${m.avatar}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+            <div>
+              <h3>${m.name}</h3>
+              <div class="role">${m.title} · ${m.org}</div>
+            </div>
+            <span class="chip ${m.matchedOn.length ? 'mint' : ''}">★ ${m.rating}</span>
+          </div>
+          <div class="bio">${m.bio}</div>
+          <div class="tags">${m.expertise.map(e =>
+            `<span class="chip ${m.matchedOn.includes(e)?'mint':''}">${e}</span>`).join('')}</div>
+          <div class="why ${m.matchedOn.length?'':'none'}">${m.matchReason}</div>
+          <div style="font-size:11px;color:var(--paper-dim);margin-top:10px;">
+            Speaks ${m.languages.join(', ')} · ${m.openSlots} open slot(s)
+          </div>
+          <div class="slots">
+            ${m.slots.filter(s=>!s.bookedBy).slice(0,3).map(s =>
+              `<button class="slot" data-m="${m.id}" data-s="${s.id}" data-n="${m.name}" data-w="${s.startsAt}">
+                 ${when(s.startsAt)} · ${s.durationMins}m</button>`).join('')
+              || '<span style="font-size:11.5px;color:var(--paper-dim);">No open slots right now.</span>'}
+          </div>
+        </div>
+      </div>`).join('');
+
+    list.querySelectorAll('.slot').forEach(b => b.onclick = () => openBooking(b.dataset));
+    if (window.GG_rewire) GG_rewire();
+  }catch(e){
+    list.innerHTML = '<div class="panel" style="border-color:rgba(255,107,107,.3)"><h3 style="margin-bottom:7px;">Backend unreachable</h3><p style="color:var(--paper-dim);font-size:13px;">'+e.message+'</p></div>';
+  }
+}
+
+function openBooking(d){
+  if (!signedIn){ toast('Sign in first', 'Booking needs an account.', '🔒'); setTimeout(()=>location.href='login.html', 1200); return; }
+  pending = d;
+  document.getElementById('mTitle').textContent = 'Book ' + d.n;
+  document.getElementById('mSub').textContent = when(d.w);
+  document.getElementById('modalBg').classList.add('show');
+}
+document.getElementById('mCancel').onclick = () => document.getElementById('modalBg').classList.remove('show');
+document.getElementById('mConfirm').onclick = async () => {
+  if (!pending) return;
+  const btn = document.getElementById('mConfirm');
+  btn.disabled = true; btn.textContent = 'Booking…';
+  try{
+    const r = await GG_API.post('/mentors/'+pending.m+'/book', {
+      slotId: pending.s,
+      topic: document.getElementById('mTopic').value.trim(),
+      question: document.getElementById('mQ').value.trim(),
+    });
+    document.getElementById('modalBg').classList.remove('show');
+    toast('Session booked', 'Video link is live immediately — no install needed.', '📅');
+    loadSessions(); findMentors(document.getElementById('need').value.trim());
+  }catch(e){ toast('Could not book', e.message, '⚠️'); }
+  btn.disabled = false; btn.textContent = 'Confirm booking';
+};
+
+/* ---------------- sessions ---------------- */
+async function loadSessions(){
+  if (!signedIn) return;
+  const box = document.getElementById('sessions');
+  try{
+    const { sessions } = await GG_API.get('/mentors/sessions/mine');
+    if (!sessions.length){ box.innerHTML = '<div style="font-size:12.5px;color:var(--paper-dim);line-height:1.6;">No sessions yet. Pick a slot and you\\'ll get a video link straight away.</div>'; return; }
+    box.innerHTML = sessions.map(s => `
+      <div class="session">
+        <div class="when">${when(s.startsAt)} · ${s.durationMins} min</div>
+        <h4>${s.mentorName}</h4>
+        ${s.topic ? `<div style="font-size:12px;color:var(--paper-dim);margin-bottom:4px;">${s.topic}</div>` : ''}
+        <span class="chip ${s.status==='confirmed'?'cyan':s.status==='completed'?'mint':'amber'}">${s.status}</span>
+        ${s.status==='confirmed' ? `
+          <div><a class="join" href="${s.joinUrl}" target="_blank" rel="noopener">Join video call →</a></div>
+          <button class="link-mini" data-done="${s.id}">Mark complete &amp; add notes</button>
+          <button class="link-mini" data-cancel="${s.id}" style="margin-left:12px;">Cancel</button>` : ''}
+        ${s.status==='completed' && s.notes ? `
+          <div style="font-size:12px;color:var(--paper-dim);margin-top:9px;line-height:1.6;">${s.notes}</div>
+          ${(s.actionItems||[]).map((a,i)=>`
+            <label class="ai-item ${a.done?'done':''}">
+              <input type="checkbox" ${a.done?'checked':''} data-ses="${s.id}" data-idx="${i}">
+              <span>${a.text}</span></label>`).join('')}` : ''}
+      </div>`).join('');
+
+    box.querySelectorAll('[data-done]').forEach(b => b.onclick = () => {
+      closing = b.dataset.done; document.getElementById('doneBg').classList.add('show');
+    });
+    box.querySelectorAll('[data-cancel]').forEach(b => b.onclick = async () => {
+      try{ await GG_API.post('/mentors/sessions/'+b.dataset.cancel+'/cancel', {});
+        toast('Cancelled', 'The slot is open for someone else again.', '↩️');
+        loadSessions(); findMentors(document.getElementById('need').value.trim());
+      }catch(e){ toast('Could not cancel', e.message, '⚠️'); }
+    });
+    box.querySelectorAll('[data-ses]').forEach(c => c.onchange = async () => {
+      try{ await GG_API.post('/mentors/sessions/'+c.dataset.ses+'/actions/'+c.dataset.idx+'/toggle', {}); loadSessions(); }
+      catch(e){ toast('Could not update', e.message, '⚠️'); }
+    });
+    if (window.GG_rewire) GG_rewire();
+  }catch(e){
+    box.innerHTML = '<div style="font-size:12.5px;color:var(--danger);">'+e.message+'</div>';
+  }
+}
+
+document.getElementById('dCancel').onclick = () => document.getElementById('doneBg').classList.remove('show');
+document.getElementById('dConfirm').onclick = async () => {
+  const notes = document.getElementById('dNotes').value.trim();
+  if (!notes) return toast('Notes required', 'Even two lines helps you later.', '📝');
+  try{
+    await GG_API.post('/mentors/sessions/'+closing+'/complete', {
+      notes,
+      actionItems: document.getElementById('dActions').value.split('\n').map(s=>s.trim()).filter(Boolean),
+    });
+    document.getElementById('doneBg').classList.remove('show');
+    document.getElementById('dNotes').value=''; document.getElementById('dActions').value='';
+    toast('Session saved', '+80 XP · notes kept on your profile.', '✅');
+    loadSessions();
+  }catch(e){ toast('Could not save', e.message, '⚠️'); }
+};
+
+/* ---------------- wire ---------------- */
+document.getElementById('findBtn').onclick = () => findMentors(document.getElementById('need').value.trim());
+document.getElementById('need').addEventListener('keydown', e => {
+  if (e.key === 'Enter') findMentors(e.target.value.trim());
+});
+document.querySelectorAll('.quick button').forEach(b => b.onclick = () => {
+  document.getElementById('need').value = b.dataset.q;
+  findMentors(b.dataset.q);
+});
+
+findMentors('');
+loadSessions();
+</script>
+</body>
+</html>

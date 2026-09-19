@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — GreenGrid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<style>
+  body{ cursor:none; }
+  .panel-view{ display:none; }
+  .panel-view.active{ display:block; }
+  .streak-row{ display:flex; gap:8px; margin-top:10px; }
+  .streak-day{ width:26px; height:26px; border-radius:8px; background:var(--bg-panel-2); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--paper-dim); }
+  .streak-day.done{ background:rgba(124,255,178,0.16); border-color:var(--mint); color:var(--mint); }
+
+  .mission-row{ display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--line-soft); }
+  .mission-row:last-child{ border-bottom:none; }
+  .mission-left{ display:flex; align-items:center; gap:12px; }
+  .mission-check{ width:22px; height:22px; border-radius:7px; border:1.5px solid var(--line); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; transition:all .2s; }
+  .mission-check.done{ background:var(--mint); border-color:var(--mint); color:#07130E; }
+  .mission-title{ font-size:13.5px; }
+  .mission-reward{ font-size:11.5px; color:var(--mint); font-family:'JetBrains Mono',monospace; }
+
+  .event-card{ background:var(--bg-panel); border:1px solid var(--line); border-radius:16px; padding:18px; }
+  .event-card .top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .event-card h4{ font-size:15px; margin-bottom:4px; }
+  .event-card .meta{ font-size:11.5px; color:var(--paper-dim); }
+  .gs-pill{ font-family:'JetBrains Mono',monospace; font-size:11.5px; padding:4px 10px; border-radius:999px; }
+  .gs-pill.high{ background:rgba(124,255,178,0.14); color:var(--mint); }
+  .gs-pill.mid{ background:rgba(77,232,212,0.14); color:var(--cyan); }
+  .gs-pill.low{ background:rgba(255,184,77,0.14); color:var(--ember); }
+  .cat-filter{ display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+
+  .reward-row{ display:flex; align-items:center; justify-content:space-between; padding:14px; border:1px solid var(--line); border-radius:14px; margin-bottom:10px; background:var(--bg-panel); }
+  .reward-row .rt{ font-size:13.5px; }
+  .reward-row .rs{ font-size:11px; color:var(--paper-dim); }
+
+  .lb-row{ display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--line-soft); }
+  .lb-rank{ width:26px; text-align:center; font-family:'JetBrains Mono',monospace; color:var(--paper-dim); font-size:13px; }
+  .lb-row.me{ background:rgba(124,255,178,0.06); border-radius:10px; padding:12px 10px; }
+  .lb-name{ flex:1; font-size:13.5px; }
+  .lb-xp{ font-size:12.5px; color:var(--mint); font-family:'JetBrains Mono',monospace; }
+
+  .passport-card{ background:linear-gradient(150deg, #0F2A1E, #0A1912); border:1px solid var(--mint); border-radius:20px; padding:30px; text-align:center; position:relative; overflow:hidden; }
+  .passport-card::before{ content:''; position:absolute; inset:0; background:radial-gradient(circle at 30% 20%, rgba(124,255,178,0.14), transparent 60%); }
+  .passport-card .eco{ font-size:12px; letter-spacing:.14em; color:var(--mint); position:relative; }
+  .passport-card .big{ font-size:44px; font-weight:800; font-family:'Space Grotesk',sans-serif; margin:14px 0 2px; position:relative; }
+  .passport-card .unit{ font-size:14px; color:var(--paper-dim); position:relative; }
+  .passport-card .lvl{ margin-top:20px; font-size:13px; color:var(--paper-dim); position:relative; }
+
+  #reportSuccess, #reportError{ display:none; padding:12px 14px; border-radius:10px; font-size:12.5px; margin-bottom:16px; }
+  #reportSuccess{ background:rgba(124,255,178,0.1); color:var(--mint); border:1px solid var(--mint); }
+  #reportError{ background:rgba(255,107,107,0.1); color:var(--danger); border:1px solid var(--danger); }
+  .report-status-row{ display:flex; align-items:center; justify-content:space-between; padding:12px; border:1px solid var(--line); border-radius:12px; margin-bottom:10px; }
+
+/* ---- event detail modal ---- */
+.ev-bg{ position:fixed; inset:0; background:rgba(3,8,6,.8); backdrop-filter:blur(7px); z-index:9400;
+  display:none; align-items:center; justify-content:center; padding:20px; }
+.ev-bg.show{ display:flex; }
+.ev-modal{ background:var(--bg-panel); border:1px solid var(--line); border-radius:20px; padding:28px;
+  width:100%; max-width:620px; max-height:88vh; overflow-y:auto; position:relative;
+  animation:ev-in .3s cubic-bezier(.2,.8,.3,1); }
+@keyframes ev-in{ from{opacity:0;transform:translateY(16px) scale(.96)} to{opacity:1;transform:none} }
+.ev-x{ position:absolute; top:16px; right:18px; background:none; border:none; color:var(--paper-dim);
+  font-size:24px; cursor:pointer; line-height:1; }
+.ev-x:hover{ color:var(--paper); }
+.pool-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0;
+  border-bottom:1px solid var(--line-soft); font-size:13px; }
+.pool-row:last-child{ border-bottom:none; }
+.pool-seats{ display:flex; gap:4px; }
+.pool-seats i{ width:8px; height:8px; border-radius:50%; background:var(--moss); display:block; }
+.pool-seats i.on{ background:var(--mint); }
+.goal-bar{ height:10px; border-radius:99px; background:rgba(238,243,234,.09); overflow:hidden; margin:10px 0 7px; }
+.goal-bar > i{ display:block; height:100%; background:linear-gradient(90deg,var(--cyan),var(--mint));
+  border-radius:99px; transition:width .8s cubic-bezier(.2,.7,.3,1); }
+</style>
+</head>
+<body data-require-role="student">
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="logo"><span class="logo-mark"></span> GreenGrid</div>
+    <div class="side-link active" data-panel="overview"><span class="em">🏠</span> Overview</div>
+    <div class="side-link" data-panel="events"><span class="em">🎟️</span> Explore Events</div>
+    <div class="side-link" data-panel="missions"><span class="em">🌱</span> Missions</div>
+    <div class="side-link" data-panel="wallet"><span class="em">💰</span> GreenPoints Wallet</div>
+    <div class="side-link" data-panel="community"><span class="em">🏆</span> Community</div>
+    <div class="side-link" data-panel="report"><span class="em">🚨</span> Report an Issue</div>
+    <div class="side-link" data-panel="passport"><span class="em">🧬</span> EcoDNA Passport</div>
+    <a class="side-link" href="mentors.html"><span class="em">🎓</span> Mentorship</a>
+    <a class="side-link" href="opendata.html"><span class="em">📊</span> Open Data</a>
+    <div class="side-foot">
+      <div id="sideUserName" style="color:var(--paper); font-weight:600;">—</div>
+      <div style="margin-top:6px; cursor:pointer; color:var(--danger);" onclick="logout()">Log out</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- OVERVIEW -->
+    <section class="panel-view active" id="panel-overview">
+      <div class="main-head">
+        <div><h1 id="greeting">Good to see you 👋</h1><div class="sub">Your campus journey continues…</div></div>
+      </div>
+      <div class="grid grid-4" style="margin-bottom:20px;">
+        <div class="stat-card"><div class="ico">⚡</div><div class="lbl">Level</div><div class="val" id="statLevel">—</div><div class="progress-track" style="margin-top:10px;"><div class="progress-fill" id="xpBar" style="width:0%"></div></div></div>
+        <div class="stat-card"><div class="ico">🌍</div><div class="lbl">CO₂ Saved</div><div class="val" id="statCo2">—</div><div class="delta">This semester</div></div>
+        <div class="stat-card"><div class="ico">💰</div><div class="lbl">GreenPoints</div><div class="val" id="statGp">—</div><div class="delta">Redeemable now</div></div>
+        <div class="stat-card"><div class="ico">🔥</div><div class="lbl">Streak</div><div class="val" id="statStreak">—</div><div class="streak-row" id="streakRow"></div></div>
+      </div>
+      <div class="grid grid-2">
+        <div class="panel reveal">
+          <h3 style="margin-bottom:14px;">Today's Missions</h3>
+          <div id="overviewMissions">Loading…</div>
+        </div>
+        <div class="panel reveal">
+          <h3 style="margin-bottom:14px;">Campus-Wide Impact</h3>
+          <div id="campusImpact">Loading…</div>
+        </div>
+      </div>
+      <div class="panel reveal" style="margin-top:18px;">
+        <h3 style="margin-bottom:14px;">Recommended Events</h3>
+        <div class="grid grid-3" id="overviewEvents">Loading…</div>
+      </div>
+    </section>
+
+    <!-- EVENTS -->
+    <section class="panel-view" id="panel-events">
+      <div class="main-head"><div><h1>Explore Events</h1><div class="sub">Every event carries a GreenScore — compare before you register.</div></div></div>
+      <div class="cat-filter" id="catFilter"></div>
+      <div class="grid grid-3" id="eventsGrid">Loading…</div>
+    </section>
+
+    <!-- MISSIONS -->
+    <section class="panel-view" id="panel-missions">
+      <div class="main-head"><div><h1>Eco-Missions</h1><div class="sub">Complete an action → streak continues → real impact recorded.</div></div></div>
+      <div class="panel reveal"><div id="missionsList">Loading…</div></div>
+    </section>
+
+    <!-- WALLET -->
+    <section class="panel-view" id="panel-wallet">
+      <div class="main-head"><div><h1>GreenPoints Wallet</h1><div class="sub" id="walletBalance">Balance —</div></div></div>
+      <div class="grid grid-2">
+        <div class="panel reveal"><h3 style="margin-bottom:14px;">Rewards</h3><div id="rewardsList">Loading…</div></div>
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div class="panel reveal"><h3 style="margin-bottom:14px;">Certificates</h3><div id="certList">Loading…</div></div>
+          <div class="panel reveal"><h3 style="margin-bottom:14px;">Impact Receipts</h3><div id="receiptsList">Loading…</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMMUNITY -->
+    <section class="panel-view" id="panel-community">
+      <div class="main-head"><div><h1>Community</h1><div class="sub">Campus leaderboard, guilds and your rank.</div></div></div>
+      <div class="grid grid-2">
+        <div class="panel reveal"><h3 style="margin-bottom:14px;">Impact Leaderboard</h3><div id="leaderboardList">Loading…</div></div>
+        <div class="panel reveal"><h3 style="margin-bottom:14px;">Guilds</h3><div id="guildsList">Loading…</div></div>
+      </div>
+    </section>
+
+    <!-- REPORT -->
+    <section class="panel-view" id="panel-report">
+      <div class="main-head"><div><h1>Report an Issue</h1><div class="sub">Filed reports run through GreenGrid's local AI router instantly.</div></div></div>
+      <div class="grid grid-2">
+        <div class="panel reveal">
+          <div id="reportSuccess"></div>
+          <div id="reportError"></div>
+          <form id="reportForm">
+            <div class="field"><label>Report title</label><input type="text" id="rTitle" required placeholder="e.g. Overflowing bin near cafeteria"></div>
+            <div class="field"><label>Category</label>
+              <select id="rCategory">
+                <option>Waste</option><option>Water</option><option>Infrastructure</option><option>Energy</option><option>Other</option>
+              </select>
+            </div>
+            <div class="field"><label>Location</label><input type="text" id="rLocation" required placeholder="e.g. Block A"></div>
+            <div class="field"><label>Description</label><textarea id="rDescription" required placeholder="What's happening?"></textarea></div>
+            <div style="font-size:11px; color:var(--paper-dim); margin-bottom:16px;">🔒 Only your report content and campus zone are stored — no location tracking.</div>
+            <button class="btn-primary" type="submit" data-magnetic style="width:100%;">Submit Report</button>
+          </form>
+        </div>
+        <div class="panel reveal"><h3 style="margin-bottom:14px;">Your Reports</h3><div id="myReports">No reports yet.</div></div>
+      </div>
+    </section>
+
+    <!-- PASSPORT -->
+    <section class="panel-view" id="panel-passport">
+      <div class="main-head"><div><h1>EcoDNA Passport</h1><div class="sub">A shareable snapshot of your semester impact.</div></div></div>
+      <div class="grid grid-2">
+        <div class="passport-card reveal" id="passportCard">
+          <div class="eco">🌱 GREENGRID</div>
+          <div class="big" id="passportCo2">—</div>
+          <div class="unit">KG CO₂ SAVED THIS SEMESTER</div>
+          <div class="lvl" id="passportLevel">Level — · #GreenGrid</div>
+        </div>
+        <div class="panel reveal">
+          <h3 style="margin-bottom:14px;">Badges Unlocked</h3>
+          <div class="grid grid-3" id="badgesGrid" style="grid-template-columns:repeat(2,1fr); gap:14px;"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth-guard.js"></script>
+<script src="assets/js/cursor.js"></script>
+<script src="assets/js/sri.js"></script>
+<script>
+// auth-guard.js (loaded above) already redirects if no session exists,
+// but the redirect is async — null-guard here so a stale page load
+// doesn't crash with TypeError before the redirect fires.
+const user0 = GG_API.getUser() || { name: 'there', role: 'student' };
+document.getElementById('greeting').textContent = `Good to see you, ${user0.name.split(' ')[0]} 👋`;
+document.getElementById('sideUserName').textContent = user0.name;
+
+function logout(){ GG_API.clearToken(); window.location.href = 'login.html'; }
+
+document.querySelectorAll('.side-link[data-panel]').forEach(link=>{
+  link.addEventListener('click', ()=>{
+    document.querySelectorAll('.side-link[data-panel]').forEach(l=>l.classList.remove('active'));
+    link.classList.add('active');
+    document.querySelectorAll('.panel-view').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+link.dataset.panel).classList.add('active');
+    window.GG_wireTilt && window.GG_wireTilt();
+    window.GG_wireReveal && window.GG_wireReveal();
+    window.GG_rewire && window.GG_rewire();
+  });
+});
+
+const BADGE_LIBRARY = {
+  eco_starter: { icon:'🌱', title:'Eco Starter', desc:'Completed your first mission.' },
+  carpool_captain: { icon:'🚗', title:'Carpool Captain', desc:'Carpooled to 5 events.' },
+  report_hero: { icon:'🚨', title:'Report Hero', desc:'Filed 3 verified reports.' },
+  streak_7: { icon:'🔥', title:'7-Day Streak', desc:'Completed a mission 7 days running.' },
+};
+
+function gsClass(score){ return score >= 75 ? 'high' : score >= 55 ? 'mid' : 'low'; }
+
+async function loadOverview(){
+  try{
+    const d = await GG_API.dashboard();
+    document.getElementById('statLevel').textContent = 'Lv. ' + d.user.level;
+    document.getElementById('xpBar').style.width = Math.min(100, Math.round((d.user.intoLevel / d.user.forNextLevel) * 100)) + '%';
+    document.getElementById('statCo2').textContent = d.user.co2SavedKg.toFixed(1) + ' kg';
+    document.getElementById('statGp').textContent = d.user.greenPoints;
+    document.getElementById('statStreak').textContent = d.user.streakDays + ' days';
+    document.getElementById('streakRow').innerHTML = Array.from({length:7}).map((_,i)=>
+      `<div class="streak-day ${i < Math.min(7,d.user.streakDays) ? 'done':''}">${i+1}</div>`).join('');
+
+    document.getElementById('campusImpact').innerHTML = `
+      <div class="grid grid-2" style="gap:12px;">
+        <div><div class="lbl" style="font-size:11px;color:var(--paper-dim)">Students Participating</div><div class="val" style="font-size:20px;">${d.campus.studentsParticipating.toLocaleString()}</div></div>
+        <div><div class="lbl" style="font-size:11px;color:var(--paper-dim)">Green Events</div><div class="val" style="font-size:20px;">${d.campus.greenEvents}</div></div>
+        <div><div class="lbl" style="font-size:11px;color:var(--paper-dim)">CO₂ Avoided</div><div class="val" style="font-size:20px;">${d.campus.co2AvoidedTonnes}t</div></div>
+        <div><div class="lbl" style="font-size:11px;color:var(--paper-dim)">Eco Actions</div><div class="val" style="font-size:20px;">${d.campus.ecoActions.toLocaleString()}</div></div>
+      </div>`;
+
+    document.getElementById('overviewEvents').innerHTML = d.upcoming.map(e =>
+      `<div class="event-card"><div class="top"><h4>${GG_API.esc(e.title)}</h4><span class="gs-pill ${gsClass(e.greenScore)}">🌿 ${GG_API.esc(e.greenScore)}</span></div>
+      <div class="meta">${new Date(e.date).toLocaleDateString()} · ${GG_API.esc(e.location)}</div>
+      <div class="meta" style="margin-top:8px; color:var(--mint);">+${GG_API.esc(e.xpReward)} XP</div></div>`).join('') || '<p style="color:var(--paper-dim)">No upcoming events.</p>';
+
+    // passport
+    document.getElementById('passportCo2').textContent = d.user.co2SavedKg.toFixed(1);
+    document.getElementById('passportLevel').textContent = `Level ${d.user.level} · Rank #${d.user.rank}`;
+    document.getElementById('badgesGrid').innerHTML = (d.user.badges||[]).map(b=>{
+      const meta = BADGE_LIBRARY[b] || {icon:'🏅', title:b, desc:''};
+      return `<div class="flip-card"><div class="flip-inner">
+        <div class="flip-face flip-front"><div style="font-size:26px;">${meta.icon}</div><div style="font-size:12.5px; font-weight:700; margin-top:6px;">${meta.title}</div></div>
+        <div class="flip-face flip-back">${meta.desc}</div>
+      </div></div>`;
+    }).join('') || '<p style="color:var(--paper-dim); font-size:13px;">Complete missions to unlock badges.</p>';
+    document.querySelectorAll('.flip-card').forEach(c=> c.addEventListener('click', ()=> c.classList.toggle('flipped')));
+
+    document.getElementById('receiptsList').innerHTML = d.receipts.map(r =>
+      `<div class="mission-row"><div><div class="mission-title">${GG_API.esc(r.note)}</div><div class="meta" style="font-size:11px;">${new Date(r.createdAt).toLocaleString()}</div></div>
+      <div class="mission-reward">+${GG_API.esc(r.xpDelta)}XP / +${GG_API.esc(r.greenPointsDelta)}GP</div></div>`).join('') || '<p style="color:var(--paper-dim); font-size:13px;">No transactions yet — complete a mission.</p>';
+
+    return d;
+  }catch(e){
+    document.getElementById('overviewMissions').innerHTML = `<p style="color:var(--danger); font-size:13px;">${e.message}</p>`;
+  }
+}
+
+async function loadMissionsInto(targetId, alsoOverview){
+  try{
+    const { missions } = await GG_API.missions();
+    const html = missions.map(m =>
+      `<div class="mission-row">
+        <div class="mission-left">
+          <div class="mission-check ${m.completedToday?'done':''}" data-id="${GG_API.esc(m.id)}">${m.completedToday?'✓':''}</div>
+          <div><div class="mission-title">${GG_API.esc(m.title)}</div><div class="mission-reward">+${GG_API.esc(m.xp)} XP · +${GG_API.esc(m.greenPoints)} GP · ${GG_API.esc(m.co2Kg)}kg CO₂</div></div>
+        </div>
+      </div>`).join('');
+    document.getElementById(targetId).innerHTML = html;
+    if(alsoOverview) document.getElementById('overviewMissions').innerHTML = html;
+    document.querySelectorAll('.mission-check').forEach(chk=>{
+      chk.addEventListener('click', async ()=>{
+        if(chk.classList.contains('done')) return;
+        try{
+          await GG_API.completeMission(chk.dataset.id);
+          GGToast('Mission complete! 🌱', 'XP and GreenPoints added to your wallet.', '✅');
+          loadMissionsInto('missionsList', true);
+          loadOverview();
+        }catch(e){ GGToast('Could not complete', e.message, '⚠️'); }
+      });
+    });
+  }catch(e){ document.getElementById(targetId).innerHTML = `<p style="color:var(--danger)">${e.message}</p>`; }
+}
+
+let allEvents = [];
+async function loadEvents(category){
+  try{
+    const q = category && category !== 'All events' ? ('?category=' + encodeURIComponent(category)) : '';
+    const { events } = await GG_API.events(q);
+    allEvents = events;
+    document.getElementById('eventsGrid').innerHTML = events.map(e =>
+      `<div class="event-card tilt-card" data-ev="${GG_API.esc(e.id)}" style="cursor:pointer;"><div class="glow"></div>
+        <div class="top"><h4>${GG_API.esc(e.title)}</h4><span class="gs-pill ${gsClass(e.greenScore)}">🌿 ${GG_API.esc(e.greenScore)}</span></div>
+        <div class="meta">${GG_API.esc(e.category)} · ${new Date(e.date).toLocaleDateString()}</div>
+        <div class="meta">${GG_API.esc(e.location)} · ${GG_API.esc(e.attendeeCount)} attending</div>
+        <div class="meta" style="margin-top:10px; color:var(--paper-dim);">Est. ${GG_API.esc(e.co2EstimateKg)}kg CO₂ · Budget ${GG_API.esc(e.carbonBudgetKg)}kg</div>
+        ${e.certified ? '<span class="badge green" style="margin-top:10px;">🌿 Green Certified</span>' : ''}
+      </div>`).join('');
+    document.querySelectorAll('#eventsGrid [data-ev]').forEach(c =>
+      c.addEventListener('click', () => openEvent(c.dataset.ev)));
+    window.GG_wireTilt && window.GG_wireTilt();
+    window.GG_rewire && window.GG_rewire();
+  }catch(e){ document.getElementById('eventsGrid').innerHTML = `<p style="color:var(--danger)">${e.message}</p>`; }
+}
+['All events','Community','Workshops','Culture','Tech'].forEach(cat=>{
+  const b = document.createElement('button'); b.className='btn-ghost btn-sm'; b.textContent = cat;
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('#catFilter button').forEach(x=>x.style.background='transparent');
+    b.style.background = 'var(--bg-panel-2)';
+    loadEvents(cat);
+  });
+  document.getElementById('catFilter').appendChild(b);
+});
+
+async function loadWallet(d){
+  const dash = d || await GG_API.dashboard();
+  document.getElementById('walletBalance').textContent = `Balance ${dash.user.greenPoints} GreenPoints`;
+  const { rewards } = await GG_API.get('/rewards').catch(()=>({rewards:[
+    {title:'Free Campus Coffee', cost:300, sponsor:'Campus Café'},
+    {title:'Event Fast-Pass', cost:500, sponsor:'AllCollegeEvent'},
+    {title:'Cafeteria Coupon', cost:700, sponsor:'Campus Fund'},
+    {title:'GreenGrid Eco Merch', cost:1000, sponsor:'EcoRide'},
+  ]}));
+  const bal = dash.user.greenPoints;
+  document.getElementById('rewardsList').innerHTML = rewards.map(r => `
+    <div class="reward-row">
+      <div><div class="rt">${r.title}</div><div class="rs">Sponsored by ${r.sponsor}</div></div>
+      <div style="display:flex;align-items:center;gap:9px;">
+        <span class="badge amber">${r.cost} GP</span>
+        ${r.id ? `<button class="btn-ghost btn-sm" data-redeem="${r.id}" ${bal < r.cost ? 'disabled style="opacity:.45;cursor:not-allowed;"' : ''}>
+          ${bal < r.cost ? 'Need ' + (r.cost - bal) : 'Redeem'}</button>` : ''}
+      </div>
+    </div>`).join('');
+
+  document.querySelectorAll('[data-redeem]').forEach(b => b.addEventListener('click', async () => {
+    b.disabled = true; b.textContent = '…';
+    try{
+      const r = await GG_API.redeemReward(b.dataset.redeem);
+      GGToast('Redeemed', `${r.reward.title} · code ${r.redemptionCode}`, '🎁');
+      loadWallet();
+      loadOverview();
+    }catch(err){
+      // The evidence rule is a real gate, so explain it rather than
+      // just failing — the student can act on this.
+      GGToast('Not redeemed', err.message, '⚠️');
+      b.disabled = false; b.textContent = 'Redeem';
+    }
+  }));
+  loadCertificates();
+}
+
+/* ---------------- certificates ---------------- */
+async function loadCertificates(){
+  const box = document.getElementById('certList');
+  if (!box) return;
+  try{
+    const { certificates } = await GG_API.certificates();
+    box.innerHTML = certificates.length ? certificates.map(c => `
+      <div class="reward-row">
+        <div>
+          <div class="rt">${c.eventTitle}</div>
+          <div class="rs">${c.actionsCompleted} action(s) · ${c.co2Kg} kg CO₂e · issued ${new Date(c.issuedAt).toLocaleDateString()}</div>
+          <div class="mono" style="font-size:10.5px;color:var(--cyan);margin-top:5px;">${c.code}</div>
+        </div>
+        <button class="btn-ghost btn-sm" data-verify="${c.code}">Verify</button>
+      </div>`).join('')
+      : `<p style="font-size:12.5px;color:var(--paper-dim);line-height:1.6;">
+          No certificates yet. Complete an action at an event, then claim one from the event page.
+          Each carries a public code anyone can check — a credential nobody outside GreenGrid can
+          verify isn't really a credential.</p>`;
+    box.querySelectorAll('[data-verify]').forEach(b => b.addEventListener('click', async () => {
+      try{
+        const v = await GG_API.verifyCertificate(b.dataset.verify);
+        GGToast('Verified ✓', `${v.certificate.holder} · ${v.certificate.event}`, '🎓');
+      }catch(e){ GGToast('Could not verify', e.message, '⚠️'); }
+    }));
+    window.GG_rewire && window.GG_rewire();
+  }catch(e){ box.innerHTML = `<p style="color:var(--danger);font-size:12.5px;">${e.message}</p>`; }
+}
+
+async function loadCommunity(){
+  try{
+    const { leaderboard } = await GG_API.leaderboard();
+    document.getElementById('leaderboardList').innerHTML = leaderboard.slice(0,10).map(u =>
+      `<div class="lb-row ${u.name===user0.name?'me':''}"><div class="lb-rank">#${GG_API.esc(u.rank)}</div>
+      <div class="lb-name">${GG_API.esc(u.name)}${u.guild?` · <span style="color:var(--paper-dim);">${GG_API.esc(u.guild)}</span>`:''}</div>
+      <div class="lb-xp">${GG_API.esc(u.xp)} XP</div></div>`).join('');
+    const { guilds } = await GG_API.guilds();
+    document.getElementById('guildsList').innerHTML = guilds.map(g =>
+      `<div class="mission-row"><div><div class="mission-title">${GG_API.esc(g.name)}</div><div class="meta">${GG_API.esc(g.memberCount)} members · ${GG_API.esc(g.issuesSolved)} issues solved</div></div>
+      <div class="mission-reward">${GG_API.esc(g.co2SavedKg)}kg CO₂</div></div>`).join('');
+  }catch(e){ document.getElementById('leaderboardList').innerHTML = `<p style="color:var(--danger)">${e.message}</p>`; }
+}
+
+async function loadMyReports(){
+  try{
+    const { reports } = await GG_API.reports();
+    document.getElementById('myReports').innerHTML = reports.length ? reports.map(r =>
+      `<div class="report-status-row"><div><div class="mission-title">${GG_API.esc(r.title)}</div><div class="meta">${GG_API.esc(r.location)} · ${GG_API.esc(r.ai?.category||'Analyzing…')}</div></div>
+      <span class="badge ${r.status==='resolved'?'green':'amber'}">${GG_API.esc(r.status)}</span></div>`).join('') : 'No reports yet.';
+  }catch(e){}
+}
+
+document.getElementById('reportForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const okBox = document.getElementById('reportSuccess'), errBox = document.getElementById('reportError');
+  okBox.style.display='none'; errBox.style.display='none';
+  try{
+    const payload = {
+      title: document.getElementById('rTitle').value,
+      category: document.getElementById('rCategory').value,
+      location: document.getElementById('rLocation').value,
+      description: document.getElementById('rDescription').value,
+    };
+    const res = await GG_API.submitReport(payload);
+    okBox.textContent = res.report.ai.narrative
+      ? res.report.ai.narrative
+      : `Submitted. AI routed this to ${res.report.ai.responsibleTeam} · Urgency ${res.report.ai.urgency} · Confidence ${res.report.ai.confidence}%.${res.report.ai.relatedCount ? ` Linked to ${res.report.ai.relatedCount} related report(s).` : ''}`;
+    okBox.style.display='block';
+    document.getElementById('reportForm').reset();
+    GGToast('Report analyzed', `Routed to ${res.report.ai.responsibleTeam}`, '🚨');
+    loadMyReports();
+    loadOverview();
+  }catch(err){
+    errBox.textContent = err.message; errBox.style.display='block';
+  }
+});
+
+(async function boot(){
+  const d = await loadOverview();
+  // Single /missions request shared across both the overview panel and
+  // the dedicated Missions panel — avoids two identical API calls at boot.
+  loadMissionsInto('missionsList', true);
+  loadEvents('All events');
+  // d may be undefined if loadOverview() threw — loadWallet handles that
+  // gracefully by falling back to its own /dashboard call.
+  loadWallet(d || null);
+  loadCommunity();
+  loadMyReports();
+})();
+
+/* =========================================================
+   EVENT DETAIL — EcoPool, collective goal, certificate claim
+   ========================================================= */
+const CORRIDORS = ['OMR — Sholinganallur','Tambaram','Velachery','Adyar','Porur','Guindy'];
+let evCurrent = null;
+
+function openEvent(id){
+  evCurrent = allEvents.find(e => e.id === id);
+  if (!evCurrent) return;
+  document.getElementById('evBg').classList.add('show');
+  document.getElementById('evContent').innerHTML = '<div class="skeleton" style="height:200px;"></div>';
+  renderEvent();
+}
+// The event modal markup is injected AFTER this script block in the HTML,
+// so wiring must happen after the DOM is fully parsed.
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('evX').onclick = () => document.getElementById('evBg').classList.remove('show');
+  document.getElementById('evBg').addEventListener('click', e => {
+    if (e.target.id === 'evBg') document.getElementById('evBg').classList.remove('show');
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const bg = document.getElementById('evBg');
+    if (bg) bg.classList.remove('show');
+  }
+});
+
+async function renderEvent(){
+  const e = evCurrent;
+  const box = document.getElementById('evContent');
+  // Receipt, pools and goal are three independent reads — one failing
+  // shouldn't blank the whole modal, so they're settled separately.
+  const [receiptR, poolsR, goalR] = await Promise.allSettled([
+    GG_API.eventReceipt(e.id), GG_API.ecoPool(e.id), GG_API.eventGoal(e.id),
+  ]);
+  const model = receiptR.status === 'fulfilled' ? receiptR.value.model : null;
+  const pools = poolsR.status === 'fulfilled' ? poolsR.value.pools : [];
+  const goal  = goalR.status === 'fulfilled' ? goalR.value.goal : null;
+
+  const cats = model ? model.categories : null;
+  const catTotal = cats ? Object.values(cats).reduce((s,v)=>s+v,0) || 1 : 1;
+  const joined = pools.find(p => p.joined);
+
+  box.innerHTML = `
+    <div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:6px;">
+      <h2 style="font-size:21px;font-weight:600;padding-right:30px;">${e.title}</h2>
+      <span class="gs-pill ${gsClass(e.greenScore)}" style="flex-shrink:0;">🌿 ${e.greenScore}</span>
+    </div>
+    <div class="meta" style="margin-bottom:18px;">${e.category} · ${new Date(e.date).toLocaleDateString()} · ${e.location} · ${e.attendeeCount} attending</div>
+
+    ${model ? `
+      <div class="panel" style="background:var(--bg-panel-2);margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--paper-dim);margin-bottom:9px;">
+          <span>Estimated ${model.co2EstimateKg.toLocaleString()} kg CO₂e</span>
+          <span>Budget ${model.carbonBudgetKg.toLocaleString()} kg · ${model.underBudget
+            ? '<span style="color:var(--mint)">under</span>'
+            : '<span style="color:var(--ember)">' + model.overBudgetKg.toLocaleString() + ' over</span>'}</span>
+        </div>
+        <div class="split">${['transport','energy','food','waste','materials'].map(k =>
+          `<i class="c-${k}" style="width:${((cats[k]||0)/catTotal*100).toFixed(1)}%"></i>`).join('')}</div>
+        <div class="split-key">${['transport','energy','food','waste','materials'].map(k =>
+          `<span><b class="c-${k}"></b>${k} ${Math.round(cats[k]||0)}kg</span>`).join('')}</div>
+        <div style="margin-top:13px;padding-top:11px;border-top:1px solid var(--line-soft);font-size:11px;color:var(--paper-dim);line-height:1.6;">
+          Model ${model.modelVersion} · confidence ${model.confidence} ·
+          would score ${model.counterfactual.baselineScore}/100 with no measures taken
+        </div>
+      </div>` : ''}
+
+    ${goal ? `
+      <div class="panel" style="background:var(--bg-panel-2);margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <h3 style="font-size:14px;">Collective goal</h3>
+          <span class="chip ${goal.achieved?'mint':'cyan'}">${goal.achieved?'Achieved':goal.progressPct + '%'}</span>
+        </div>
+        <div class="goal-bar"><i style="width:${Math.min(100,goal.progressPct)}%"></i></div>
+        <div style="font-size:12px;color:var(--paper-dim);">
+          ${goal.currentCo2Kg} of ${goal.targetCo2Kg} kg CO₂e · ${goal.contributors} contributor(s)
+        </div>
+        <div style="font-size:11.5px;color:var(--mint);margin-top:8px;">🎁 ${goal.rewardLabel}</div>
+        <div style="font-size:11px;color:var(--paper-dim);margin-top:9px;line-height:1.55;">
+          Everyone who contributed unlocks this together — it's a shared target, not a ranking.
+        </div>
+      </div>` : ''}
+
+    <div class="panel" style="background:var(--bg-panel-2);margin-bottom:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:11px;">
+        <h3 style="font-size:14px;">🚗 EcoPool</h3>
+        <span style="font-size:11px;color:var(--paper-dim);">${pools.length} group(s) forming</span>
+      </div>
+      ${pools.length ? pools.map(p => `
+        <div class="pool-row">
+          <div>
+            <div>${p.corridor}</div>
+            <div style="font-size:11px;color:var(--paper-dim);margin-top:3px;">
+              ${p.memberIds.length}/${p.capacity} riders · ~${p.co2SavedKg} kg saved</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="pool-seats">${Array.from({length:p.capacity},(_,i)=>
+              `<i class="${i < p.memberIds.length ? 'on' : ''}"></i>`).join('')}</div>
+            ${p.joined ? '<span class="chip mint">joined</span>'
+              : p.seatsLeft ? `<button class="btn-ghost btn-sm" data-join="${p.corridor}">Join</button>`
+              : '<span class="chip">full</span>'}
+          </div>
+        </div>`).join('') : '<p style="font-size:12.5px;color:var(--paper-dim);">No groups yet — start one below.</p>'}
+
+      ${joined ? '' : `
+        <div style="margin-top:14px;padding-top:13px;border-top:1px solid var(--line-soft);">
+          <div style="font-size:11px;color:var(--paper-dim);margin-bottom:8px;">Travelling from somewhere else?</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;">
+            ${CORRIDORS.map(c => `<button class="btn-ghost btn-sm" data-join="${c}">${c}</button>`).join('')}
+          </div>
+        </div>`}
+      <div style="font-size:11px;color:var(--paper-dim);margin-top:12px;line-height:1.55;">
+        Matching uses a broad corridor only, never your address — the system just needs to know
+        two people head the same way to the same event.
+      </div>
+    </div>
+
+    <div style="display:flex;gap:9px;flex-wrap:wrap;">
+      <button class="btn-submit" id="claimCert" style="flex:1;min-width:180px;">🎓 Claim certificate</button>
+      <button class="btn-ghost btn-sm" id="askSri" style="padding:14px 18px;">Ask Sri about this event</button>
+    </div>
+    <div style="font-size:11px;color:var(--paper-dim);margin-top:9px;line-height:1.55;">
+      A certificate needs at least one completed action at this event, and carries a public verify code.
+    </div>`;
+
+  box.querySelectorAll('[data-join]').forEach(b => b.addEventListener('click', async () => {
+    b.disabled = true; b.textContent = 'Joining…';
+    try{
+      const r = await GG_API.joinEcoPool(e.id, b.dataset.join);
+      GGToast('EcoPool joined', `${b.dataset.join} · +${r.transaction.xpDelta} XP`
+        + (r.sponsorFunding ? ` · funded by ${r.sponsorFunding.sponsorName}` : ''), '🚗');
+      renderEvent();
+      loadOverview();
+    }catch(err){ GGToast('Could not join', err.message, '⚠️'); renderEvent(); }
+  }));
+
+  // Use event delegation on the box so buttons injected into innerHTML
+  // are always found — direct getElementById calls on dynamically-injected
+  // content are safe here, but delegation is more robust on re-renders.
+  box.querySelector('#claimCert').onclick = async function(){
+    this.disabled = true; this.textContent = 'Claiming…';
+    try{
+      const r = await GG_API.issueCertificate(e.id);
+      GGToast('Certificate issued', `Code ${r.certificate.code} — publicly verifiable.`, '🎓');
+      loadCertificates();
+      this.textContent = '✓ Claimed';
+    }catch(err){
+      // 400 means "no action at this event yet" — tell the student what to do.
+      const friendly = err.message.includes('at least one action')
+        ? 'Complete at least one action at this event first (e.g. join an EcoPool group above), then claim your certificate.'
+        : err.message;
+      GGToast('Not issued', friendly, '⚠️');
+      this.disabled = false; this.textContent = '🎓 Claim certificate';
+    }
+  };
+
+  box.querySelector('#askSri').onclick = () => {
+    document.getElementById('evBg').classList.remove('show');
+    if (window.Sri) { Sri.open(); setTimeout(()=>Sri.ask('How do I improve the score for ' + e.title + '?'), 420); }
+  };
+
+  window.GG_rewire && window.GG_rewire();
+}
+
+</script>
+
+<!-- ============ EVENT DETAIL MODAL ============ -->
+<div class="ev-bg" id="evBg">
+  <div class="ev-modal">
+    <button class="ev-x" id="evX" aria-label="Close">×</button>
+    <div id="evContent"><div class="skeleton" style="height:200px;"></div></div>
+  </div>
+</div>
+
+</body>
+</html>
