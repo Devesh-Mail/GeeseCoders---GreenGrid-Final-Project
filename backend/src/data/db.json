@@ -1,0 +1,644 @@
+{
+  "users": [
+    {
+      "id": "u_w2sfznxh",
+      "name": "Rohan Verma",
+      "email": "rohan@campus.edu",
+      "passwordHash": "$2a$08$CZH.BMl3unXpo/oq/IIm6OwATyh6rrG8ZCNzkQXasCRwO4T/T0g4W",
+      "role": "student",
+      "campus": "St. Joseph's Institute of Technology",
+      "xp": 2550,
+      "level": 5,
+      "greenPoints": 890,
+      "co2SavedKg": 12.4,
+      "streakDays": 1,
+      "lastActionAt": "2026-09-19T04:18:49.043Z",
+      "guildId": "g_1d5szkxv",
+      "badges": [
+        "eco_starter",
+        "carpool_captain"
+      ],
+      "reportsFiled": 2,
+      "createdAt": "2026-09-19T03:38:37.822Z"
+    },
+    {
+      "id": "u_cnx2oyx3",
+      "name": "Tech Club Organizer",
+      "email": "organizer@campus.edu",
+      "passwordHash": "$2a$08$pRp52de0ysQaJg.6xbv8g.y40CwumSa3BUxVLCz4E1nrtojj9Mg6S",
+      "role": "admin",
+      "campus": "St. Joseph's Institute of Technology",
+      "xp": 0,
+      "level": 1,
+      "greenPoints": 0,
+      "co2SavedKg": 0,
+      "streakDays": 0,
+      "lastActionAt": null,
+      "guildId": null,
+      "badges": [],
+      "reportsFiled": 0,
+      "createdAt": "2026-09-19T03:38:37.826Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "e_6y18lefv",
+      "title": "AI & ML Workshop",
+      "category": "Workshops",
+      "date": "2026-09-22T03:38:37.827Z",
+      "location": "Innovation Lab",
+      "organizerId": "u_cnx2oyx3",
+      "attendeeIds": [],
+      "attendeeCount": 180,
+      "durationHrs": 4,
+      "mode": "hybrid",
+      "venueType": "hybrid-lab",
+      "greenScore": 82,
+      "co2EstimateKg": 390.7,
+      "carbonBudgetKg": 468,
+      "certified": true,
+      "checklist": {
+        "hybrid": true,
+        "reusable": false,
+        "publicTransport": false,
+        "digitalCerts": true,
+        "wasteSeg": false
+      },
+      "xpReward": 60,
+      "createdAt": "2026-09-19T03:38:37.827Z"
+    },
+    {
+      "id": "e_wkiazyst",
+      "title": "Cyber Security Summit",
+      "category": "Workshops",
+      "date": "2026-09-23T03:38:37.827Z",
+      "location": "Main Auditorium",
+      "organizerId": "u_cnx2oyx3",
+      "attendeeIds": [],
+      "attendeeCount": 220,
+      "durationHrs": 6,
+      "mode": "offline",
+      "venueType": "auditorium",
+      "greenScore": 42,
+      "co2EstimateKg": 1065.5,
+      "carbonBudgetKg": 638,
+      "certified": false,
+      "checklist": {
+        "hybrid": false,
+        "reusable": false,
+        "publicTransport": false,
+        "digitalCerts": false,
+        "wasteSeg": true
+      },
+      "xpReward": 60,
+      "createdAt": "2026-09-19T03:38:37.830Z"
+    },
+    {
+      "id": "e_axheabut",
+      "title": "Startup Pitch Battle",
+      "category": "Community",
+      "date": "2026-09-24T03:38:37.827Z",
+      "location": "Startup Hub",
+      "organizerId": "u_cnx2oyx3",
+      "attendeeIds": [],
+      "attendeeCount": 140,
+      "durationHrs": 3,
+      "mode": "offline",
+      "venueType": "classroom",
+      "greenScore": 38,
+      "co2EstimateKg": 623.1,
+      "carbonBudgetKg": 343,
+      "certified": false,
+      "checklist": {
+        "hybrid": false,
+        "reusable": false,
+        "publicTransport": false,
+        "digitalCerts": false,
+        "wasteSeg": false
+      },
+      "xpReward": 60,
+      "createdAt": "2026-09-19T03:38:37.831Z"
+    },
+    {
+      "id": "e_teuafna2",
+      "title": "Culture Fest — Kaleidoscope",
+      "category": "Culture",
+      "date": "2026-09-28T03:38:37.827Z",
+      "location": "Open Grounds",
+      "organizerId": "u_cnx2oyx3",
+      "attendeeIds": [],
+      "attendeeCount": 900,
+      "durationHrs": 8,
+      "mode": "offline",
+      "venueType": "outdoor",
+      "greenScore": 43,
+      "co2EstimateKg": 4748.6,
+      "carbonBudgetKg": 2880,
+      "certified": false,
+      "checklist": {
+        "hybrid": false,
+        "reusable": true,
+        "publicTransport": false,
+        "digitalCerts": false,
+        "wasteSeg": true
+      },
+      "xpReward": 60,
+      "createdAt": "2026-09-19T03:38:37.831Z"
+    },
+    {
+      "id": "e_sibiv9n6",
+      "title": "AI Hackathon — HackACE",
+      "category": "Tech",
+      "date": "2026-10-01T03:38:37.827Z",
+      "location": "College Auditorium",
+      "organizerId": "u_cnx2oyx3",
+      "attendeeIds": [],
+      "attendeeCount": 300,
+      "durationHrs": 24,
+      "mode": "offline",
+      "venueType": "auditorium",
+      "greenScore": 30,
+      "co2EstimateKg": 3422.3,
+      "carbonBudgetKg": 1680,
+      "certified": false,
+      "checklist": {
+        "hybrid": false,
+        "reusable": false,
+        "publicTransport": false,
+        "digitalCerts": false,
+        "wasteSeg": false
+      },
+      "xpReward": 60,
+      "createdAt": "2026-09-19T03:38:37.831Z"
+    }
+  ],
+  "missions": [
+    {
+      "id": "m_rel2ou02",
+      "title": "Carpool to an event",
+      "type": "daily",
+      "xp": 50,
+      "greenPoints": 25,
+      "co2Kg": 1.8,
+      "eventId": null
+    },
+    {
+      "id": "m_nhi7fq08",
+      "title": "Bring a reusable bottle",
+      "type": "daily",
+      "xp": 30,
+      "greenPoints": 15,
+      "co2Kg": 0.6,
+      "eventId": null
+    },
+    {
+      "id": "m_y7rbm4qm",
+      "title": "Avoid a disposable cup",
+      "type": "daily",
+      "xp": 25,
+      "greenPoints": 12,
+      "co2Kg": 0.4,
+      "eventId": null
+    },
+    {
+      "id": "m_l1moefav",
+      "title": "Attend an event hybrid/remote",
+      "type": "daily",
+      "xp": 40,
+      "greenPoints": 20,
+      "co2Kg": 2.1,
+      "eventId": null
+    },
+    {
+      "id": "m_1qev43v1",
+      "title": "Report a campus environmental issue",
+      "type": "daily",
+      "xp": 45,
+      "greenPoints": 22,
+      "co2Kg": 0,
+      "eventId": null
+    }
+  ],
+  "reports": [
+    {
+      "id": "r_oia18b9w",
+      "title": "Water leaking near cafeteria tap",
+      "category": "Water",
+      "location": "Cafeteria",
+      "description": "Tap has been leaking since morning, small puddle forming.",
+      "reporterId": "u_w2sfznxh",
+      "status": "resolved",
+      "ai": {
+        "category": "Water",
+        "urgency": "HIGH",
+        "impact": "Environmental + Campus Health",
+        "responsibleTeam": "Plumbing & Utilities",
+        "confidence": 97,
+        "summary": "Water issue reported at Cafeteria. Local model detected 3 matching signal(s).",
+        "engine": "local-deterministic-router",
+        "clusterId": null,
+        "relatedCount": 0
+      },
+      "clusterId": null,
+      "createdAt": "2026-09-19T03:38:37.835Z",
+      "resolvedAt": "2026-09-19T04:18:49.038Z"
+    },
+    {
+      "id": "r_h8js84t8",
+      "title": "Overflowing garbage near auditorium",
+      "category": "Waste",
+      "location": "Block A",
+      "description": "Bins overflowing after the last event, plastic waste scattered nearby.",
+      "reporterId": "u_w2sfznxh",
+      "status": "analyzed",
+      "ai": {
+        "category": "Waste",
+        "urgency": "HIGH",
+        "impact": "Environmental + Campus Health",
+        "responsibleTeam": "Campus Maintenance",
+        "confidence": 97,
+        "summary": "Waste issue reported at Block A. Local model detected 5 matching signal(s).",
+        "engine": "local-deterministic-router",
+        "clusterId": null,
+        "relatedCount": 0
+      },
+      "clusterId": null,
+      "createdAt": "2026-09-19T03:38:37.834Z",
+      "resolvedAt": null
+    }
+  ],
+  "guilds": [
+    {
+      "id": "g_1d5szkxv",
+      "name": "Greenlight",
+      "memberIds": [
+        "u_w2sfznxh"
+      ],
+      "co2SavedKg": 182,
+      "issuesSolved": 27,
+      "missionsRun": 341
+    },
+    {
+      "id": "g_x7n29z7n",
+      "name": "CarbonZero Collective",
+      "memberIds": [],
+      "co2SavedKg": 96,
+      "issuesSolved": 11,
+      "missionsRun": 158
+    }
+  ],
+  "transactions": [
+    {
+      "id": "t_r84jg06l",
+      "userId": "u_w2sfznxh",
+      "kind": "report_resolved",
+      "refId": "r_oia18b9w",
+      "xpDelta": 100,
+      "greenPointsDelta": 50,
+      "co2Kg": 0,
+      "note": "Campus resolved your report: Water leaking near cafeteria tap",
+      "createdAt": "2026-09-19T04:18:49.041Z"
+    }
+  ],
+  "rewards": [
+    {
+      "id": "rw_sq70dmwq",
+      "title": "Free Campus Coffee",
+      "cost": 300,
+      "sponsor": "Campus Café",
+      "stock": 999
+    },
+    {
+      "id": "rw_evu2dm1b",
+      "title": "Event Fast-Pass",
+      "cost": 500,
+      "sponsor": "AllCollegeEvent",
+      "stock": 999
+    },
+    {
+      "id": "rw_jfdw5dsl",
+      "title": "Cafeteria Coupon",
+      "cost": 700,
+      "sponsor": "Campus Fund",
+      "stock": 999
+    },
+    {
+      "id": "rw_70ljslxn",
+      "title": "GreenGrid Eco Merch",
+      "cost": 1000,
+      "sponsor": "EcoRide",
+      "stock": 999
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "cmp_qw6nwoqt",
+      "sponsorName": "EcoRide",
+      "title": "500 Green Rides Challenge",
+      "budgetInr": 50000,
+      "perActionInr": 12,
+      "actionKinds": [
+        "ecopool",
+        "public_transport"
+      ],
+      "eventIds": [
+        "e_sibiv9n6",
+        "e_teuafna2"
+      ],
+      "spentInr": 17640,
+      "rolledOverInr": 0,
+      "actionsFunded": 1470,
+      "co2AttributedKg": 1842.5,
+      "studentsReached": 4820,
+      "status": "active",
+      "createdAt": "2026-09-19T03:38:37.835Z",
+      "ledger": [
+        {
+          "at": "2026-09-13T03:38:37.835Z",
+          "kind": "debit",
+          "amountInr": 9120,
+          "actions": 760,
+          "note": "Culture Fest — EcoPool rides"
+        },
+        {
+          "at": "2026-09-17T03:38:37.835Z",
+          "kind": "debit",
+          "amountInr": 8520,
+          "actions": 710,
+          "note": "Workshop week — public transport claims"
+        }
+      ]
+    }
+  ],
+  "pools": [
+    {
+      "id": "pool_4rtjlcml",
+      "eventId": "e_sibiv9n6",
+      "corridor": "OMR — Sholinganallur",
+      "capacity": 4,
+      "memberIds": [
+        "seed_rider_0",
+        "seed_rider_1",
+        "seed_rider_2",
+        "seed_rider_3"
+      ],
+      "co2SavedKg": 7.2,
+      "status": "full",
+      "createdAt": "2026-09-19T03:38:37.836Z"
+    },
+    {
+      "id": "pool_138928s5",
+      "eventId": "e_sibiv9n6",
+      "corridor": "Tambaram",
+      "capacity": 4,
+      "memberIds": [
+        "seed_rider_0",
+        "seed_rider_1",
+        "seed_rider_2"
+      ],
+      "co2SavedKg": 5.4,
+      "status": "forming",
+      "createdAt": "2026-09-19T03:38:37.836Z"
+    },
+    {
+      "id": "pool_zllz4ykp",
+      "eventId": "e_sibiv9n6",
+      "corridor": "Velachery",
+      "capacity": 4,
+      "memberIds": [
+        "seed_rider_0",
+        "seed_rider_1"
+      ],
+      "co2SavedKg": 3.6,
+      "status": "forming",
+      "createdAt": "2026-09-19T03:38:37.836Z"
+    }
+  ],
+  "actions": [
+    {
+      "id": "va_h0n6n3o1",
+      "userId": "u_w2sfznxh",
+      "eventId": "e_sibiv9n6",
+      "kind": "ecopool",
+      "tier": "event_verified",
+      "trustWeight": 0.85,
+      "rawCo2Kg": 1.8,
+      "weightedCo2Kg": 1.53,
+      "note": "",
+      "createdAt": "2026-09-19T03:38:37.837Z"
+    },
+    {
+      "id": "va_ijx8wdpl",
+      "userId": "u_w2sfznxh",
+      "eventId": "e_sibiv9n6",
+      "kind": "reusable",
+      "tier": "self_reported",
+      "trustWeight": 0.4,
+      "rawCo2Kg": 0.6,
+      "weightedCo2Kg": 0.24,
+      "note": "",
+      "createdAt": "2026-09-19T03:38:37.837Z"
+    },
+    {
+      "id": "va_tsyo0g9s",
+      "userId": "u_w2sfznxh",
+      "eventId": "e_sibiv9n6",
+      "kind": "public_transport",
+      "tier": "event_verified",
+      "trustWeight": 0.85,
+      "rawCo2Kg": 2.1,
+      "weightedCo2Kg": 1.78,
+      "note": "",
+      "createdAt": "2026-09-19T03:38:37.837Z"
+    }
+  ],
+  "certificates": [
+    {
+      "id": "cert_9dlpi0dd",
+      "code": "GG-NCHC7Y",
+      "userId": "u_w2sfznxh",
+      "userName": "Rohan Verma",
+      "eventId": "e_sibiv9n6",
+      "eventTitle": "AI Hackathon — HackACE",
+      "actionsCompleted": 3,
+      "co2Kg": 3.55,
+      "greenScore": 30,
+      "issuedAt": "2026-09-19T04:39:29.292Z"
+    }
+  ],
+  "goals": [
+    {
+      "id": "goal_3hljd85h",
+      "eventId": "e_sibiv9n6",
+      "targetCo2Kg": 500,
+      "currentCo2Kg": 412,
+      "contributorIds": [],
+      "rewardLabel": "EcoRide unlocks 200 GreenPoints for every participant",
+      "achieved": false,
+      "achievedAt": null
+    }
+  ],
+  "mentors": [
+    {
+      "id": "mn_cpw754is",
+      "name": "Dr. Anitha Raghavan",
+      "title": "Sustainability Lead",
+      "org": "Chennai Climate Collective",
+      "expertise": [
+        "Event carbon planning",
+        "Carbon accounting",
+        "Campus policy"
+      ],
+      "bio": "Fifteen years measuring and reducing emissions for public events. Helps organisers find the few changes that actually move the number.",
+      "languages": [
+        "English",
+        "Tamil"
+      ],
+      "avatar": "🌏",
+      "rating": 4.9,
+      "ratingCount": 34,
+      "slots": [
+        {
+          "id": "slot_xe80o5qc",
+          "startsAt": "2026-09-20T10:30:00.000Z",
+          "durationMins": 30,
+          "bookedBy": null
+        },
+        {
+          "id": "slot_epl8l0rr",
+          "startsAt": "2026-09-21T10:30:00.000Z",
+          "durationMins": 30,
+          "bookedBy": null
+        },
+        {
+          "id": "slot_r21gfq87",
+          "startsAt": "2026-09-23T10:30:00.000Z",
+          "durationMins": 30,
+          "bookedBy": null
+        }
+      ],
+      "createdAt": "2026-09-19T03:38:37.839Z"
+    },
+    {
+      "id": "mn_lpktqvpm",
+      "name": "Karthik Subramanian",
+      "title": "Waste Systems Engineer",
+      "org": "Namma Waste",
+      "expertise": [
+        "Waste systems",
+        "Composting",
+        "Vendor management"
+      ],
+      "bio": "Designs segregation systems for campuses and festivals. Very practical about what survives contact with a real crowd.",
+      "languages": [
+        "English",
+        "Tamil"
+      ],
+      "avatar": "♻️",
+      "rating": 4.7,
+      "ratingCount": 21,
+      "slots": [
+        {
+          "id": "slot_j1ydbeby",
+          "startsAt": "2026-09-20T05:30:00.000Z",
+          "durationMins": 30,
+          "bookedBy": null
+        },
+        {
+          "id": "slot_mkdn9ar4",
+          "startsAt": "2026-09-22T05:30:00.000Z",
+          "durationMins": 30,
+          "bookedBy": null
+        },
+        {
+          "id": "slot_x74aaqd5",
+          "startsAt": "2026-09-24T05:30:00.000Z",
+          "durationMins": 30,
+          "bookedBy": null
+        }
+      ],
+      "createdAt": "2026-09-19T03:38:37.839Z"
+    },
+    {
+      "id": "mn_r53zo6aj",
+      "name": "Priya Menon",
+      "title": "CSR & Partnerships",
+      "org": "GreenBridge Advisory",
+      "expertise": [
+        "Sponsorship",
+        "CSR funding",
+        "Impact reporting"
+      ],
+      "bio": "Sits on the sponsor side of the table. Blunt about what makes a student proposal fundable and what gets ignored.",
+      "languages": [
+        "English",
+        "Malayalam"
+      ],
+      "avatar": "🤝",
+      "rating": 4.8,
+      "ratingCount": 29,
+      "slots": [
+        {
+          "id": "slot_mt3w0u0g",
+          "startsAt": "2026-09-21T12:30:00.000Z",
+          "durationMins": 30,
+          "bookedBy": null
+        },
+        {
+          "id": "slot_s729nggx",
+          "startsAt": "2026-09-22T12:30:00.000Z",
+          "durationMins": 30,
+          "bookedBy": null
+        },
+        {
+          "id": "slot_ivcm0di1",
+          "startsAt": "2026-09-25T12:30:00.000Z",
+          "durationMins": 30,
+          "bookedBy": null
+        }
+      ],
+      "createdAt": "2026-09-19T03:38:37.839Z"
+    },
+    {
+      "id": "mn_a7zyj2po",
+      "name": "Arjun Nair",
+      "title": "Mobility Researcher",
+      "org": "IIT Madras",
+      "expertise": [
+        "Transport emissions",
+        "Commute modelling",
+        "EcoPool design"
+      ],
+      "bio": "Studies campus commuting patterns. Good on why transport dominates most event footprints and what shifts it.",
+      "languages": [
+        "English",
+        "Hindi"
+      ],
+      "avatar": "🚲",
+      "rating": 4.6,
+      "ratingCount": 17,
+      "slots": [
+        {
+          "id": "slot_8hm47qma",
+          "startsAt": "2026-09-21T09:30:00.000Z",
+          "durationMins": 30,
+          "bookedBy": null
+        },
+        {
+          "id": "slot_t3mmu8cq",
+          "startsAt": "2026-09-23T09:30:00.000Z",
+          "durationMins": 30,
+          "bookedBy": null
+        },
+        {
+          "id": "slot_peloye1t",
+          "startsAt": "2026-09-26T09:30:00.000Z",
+          "durationMins": 30,
+          "bookedBy": null
+        }
+      ],
+      "createdAt": "2026-09-19T03:38:37.839Z"
+    }
+  ],
+  "sessions": []
+}
